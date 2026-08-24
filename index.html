@@ -105,25 +105,32 @@ a{color:inherit;text-decoration:none}
 .hero__desc{width:353px;color:rgba(225,225,225,.6)}
 
 /* ===== ПРЕЛОУДЕР ===== */
-@property --pa{syntax:'<angle>';inherits:false;initial-value:0deg}
 #preloader{position:absolute;top:44px;left:0;right:0;height:732px;z-index:60;background:#0e0e0f;overflow:hidden;
-  opacity:1;transition:opacity .6s ease}
+  opacity:1;transition:opacity .8s ease}
 #preloader.gone{opacity:0;pointer-events:none}
-#pl-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .6s ease}
-#preloader.fadevid #pl-video{opacity:0}
-#pl-logo{position:absolute;left:calc(50% - 50px);top:calc(50% - 50px);width:100px;height:100px;color:#E1E1E1;
-  opacity:0;transition:transform .85s cubic-bezier(.6,0,.2,1),opacity .4s ease}
-#preloader{position:absolute;top:44px;left:0;right:0;height:732px;z-index:60;background:#0e0e0f;overflow:hidden;
-  opacity:1;transition:opacity .6s ease,background .6s ease}
-#preloader.clearbg{background:transparent}
-#preloader.logo-in #pl-logo{opacity:1}
-.pl-rings,.pl-f{position:absolute;inset:0}
-.pl-rings svg,.pl-f svg{width:100px;height:100px;display:block}
-.pl-rings{-webkit-mask:conic-gradient(from -90deg,#000 var(--pa),transparent 0);mask:conic-gradient(from -90deg,#000 var(--pa),transparent 0);--pa:0deg}
-#preloader.logo-in .pl-rings{animation:plring 1s ease forwards}
-@keyframes plring{to{--pa:360deg}}
-.pl-f{opacity:0}
-#preloader.logo-f .pl-f{opacity:1;transition:opacity .5s ease}
+/* заглушка/контейнер под будущее видео — достаточно заменить содержимое на <video> */
+#pl-media{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 42%,#18181d 0%,#0e0e0f 62%);transition:opacity .6s ease}
+#preloader.media-out #pl-media{opacity:0}
+/* логотип по центру */
+#pl-logo{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;color:#E1E1E1;
+  opacity:0;transition:opacity .8s ease, transform 1.2s cubic-bezier(.16,1,.3,1)}
+#preloader.logo-on #pl-logo{opacity:1}
+#pl-svg{width:84px;height:84px;display:block;overflow:visible;transform:scale(.9);
+  transition:transform 1.1s cubic-bezier(.16,1,.3,1)}
+#preloader.logo-on #pl-svg{transform:scale(1)}
+#preloader.float #pl-svg{animation:plfloat 2.6s ease-in-out infinite}
+@keyframes plfloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1)}}
+/* два овала: прорисовка через stroke-dashoffset (pathLength=1), линия — градиентная (воздушная) */
+#pl-oval-out,#pl-oval-in{fill:none;stroke:url(#pl-grad);stroke-width:1;stroke-linecap:round;
+  stroke-dasharray:1;stroke-dashoffset:1;opacity:0;
+  transition:stroke-dashoffset 1.4s cubic-bezier(.16,1,.3,1), opacity .9s ease}
+#pl-oval-in{stroke-dashoffset:-1}                          /* обратное направление рисования */
+#preloader.draw #pl-oval-out{stroke-dashoffset:0;opacity:1}   /* внешний — по часовой */
+#preloader.draw #pl-oval-in{stroke-dashoffset:0;opacity:1}    /* внутренний — против часовой */
+/* буква F: очень плавное проявление + масштаб */
+#pl-f{opacity:0;transform:scale(.72);transform-origin:center;transform-box:fill-box;
+  transition:opacity 1.1s ease, transform 1.1s cubic-bezier(.16,1,.3,1)}
+#preloader.f-in #pl-f{opacity:1;transform:scale(1)}
 
 /* стартовые (скрытые) состояния лендинга во время прелоудера */
 #device.pl .hero__header .brand,
@@ -146,8 +153,8 @@ a{color:inherit;text-decoration:none}
 #hero-blackout{transition:opacity .8s ease}
 /* hero: строки описания появляются по очереди снизу-вверх через маску (медленно, лаконично) */
 .hero__desc .hline{display:block;overflow:hidden}
-.hero__desc .hli{display:block;transform:translateY(120%);transition:transform 1.1s cubic-bezier(.19,1,.22,1)}
-#device.rv-chrome .hero__desc .hli{transform:translateY(0)}
+.hero__desc .hli{display:block;transform:translateY(110%);transition:transform 1s cubic-bezier(.33,1,.68,1)}
+.hero__desc.reveal .hli{transform:translateY(0)}
 
 /* фиксированная CTA-плашка у нижнего края (макет 737:18077) */
 .cta-bar{position:absolute;left:0;bottom:98px;width:402px;padding:16px;background:var(--bg);z-index:25;
@@ -171,20 +178,16 @@ a{color:inherit;text-decoration:none}
 .sc__media-img{position:absolute;left:0;top:0;width:402px;background-size:cover;background-position:center}
 .sc--menu .sc__media-img{height:472px}
 .sc--interior .sc__media-img{height:500px;background-image:var(--img-hall)}
-/* карточка меню: пейджер с анимированной сменой (текст построчно снизу-вверх, графика слоями) */
-.sc__carousel{overflow:hidden}
-.sc__slide{width:402px;display:flex;flex-direction:column;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:pan-y}
-.sc__slide .sc__text{padding:32px 16px 0}
-#menu-title{min-height:38px}
-#menu-desc{width:300px;height:58px;overflow:hidden}
-.sc__cta{padding:52px 16px 0}
-.sc__media-img{will-change:transform}
-.sc__text .line{display:block;overflow:hidden}
-.sc__text .line>.li{display:block;transform:translateY(110%);opacity:0;
-  transition:transform .7s cubic-bezier(.22,.61,.36,1),opacity .6s ease}
-.sc__text .line.on>.li{transform:translateY(0);opacity:1}
-/* блок карточек меню фиксируется к верхнему углу при прокрутке */
-.sc--menu .sc__dark{position:sticky;top:0;z-index:2}
+/* блок меню: pinned horizontal scroll (вертикальный скролл двигает карточки по X) */
+.menu-hwrap{position:relative;height:calc(var(--vh-region,732px) * 3)}   /* дистанция прокрутки на 3 карточки */
+.menu-hpin{position:sticky;top:0;height:var(--vh-region,732px);overflow:hidden;background:var(--bg);z-index:2}
+.menu-htrack{display:flex;width:1206px;height:100%;will-change:transform;transform:translate3d(0,0,0)}
+.menu-hslide{flex:0 0 402px;width:402px;height:100%;display:flex;flex-direction:column}
+.menu-hslide .sc__text{padding:32px 16px 0}
+.menu-hslide .sc__text p{width:300px;height:58px;overflow:hidden}
+.menu-hbar{position:absolute;left:0;right:0;bottom:0;padding:0 16px 32px;display:flex;flex-direction:column;gap:24px;align-items:stretch;z-index:3;background:linear-gradient(to top,var(--bg) 62%,rgba(14,14,15,0))}
+.menu-hbar .sc__cta{padding:0}
+.menu-hdots{position:static;display:flex;flex-direction:row;gap:6px}
 .sc__dots{position:absolute;top:16px;right:16px;z-index:3}
 .sc__content{display:flex;flex-direction:column;gap:52px;padding:32px 16px 0}
 .sc__text{display:flex;flex-direction:column;gap:24px}
@@ -576,21 +579,33 @@ a{color:inherit;text-decoration:none}
 </svg></span>
       </div>
     </div>
-    <div class="sc__dark" id="hookah">
-      <div class="dots sc__dots"><i class="on"></i><i></i><i></i></div>
-      <div class="sc__carousel" id="menu-carousel">
-        <div class="sc__slide" id="menu-slide">
-          <div class="sc__media" id="menu-media"><div class="sc__media-img" style="background-image:var(--img-hookah)"></div></div>
-          <div class="sc__text">
-            <h3 class="t-h2" id="menu-title">Hookah</h3>
-            <p class="t-body wrap-lh" id="menu-desc">Премиальные кальяны с авторскими ароматами и сбалансированными вкусами для расслабления.</p>
+    <div class="menu-hwrap">
+      <div class="menu-hpin sc__dark" id="hookah">
+        <div class="menu-htrack" id="menu-track">
+          <div class="menu-hslide">
+            <div class="sc__media"><div class="sc__media-img" style="background-image:var(--img-hookah)"></div></div>
+            <div class="sc__text"><h3 class="t-h2">Hookah</h3>
+              <p class="t-body wrap-lh">Премиальные кальяны с авторскими ароматами и сбалансированными вкусами для расслабления.</p></div>
+          </div>
+          <div class="menu-hslide">
+            <div class="sc__media"><div class="sc__media-img" style="background-image:var(--img-kitchen)"></div></div>
+            <div class="sc__text"><h3 class="t-h2">Kitchen</h3>
+              <p class="t-body wrap-lh">Авторская кухня из сезонных продуктов — выразительные вкусы и подача до мелочей.</p></div>
+          </div>
+          <div class="menu-hslide">
+            <div class="sc__media"><div class="sc__media-img" style="background-image:var(--img-bar)"></div></div>
+            <div class="sc__text"><h3 class="t-h2">Bar</h3>
+              <p class="t-body wrap-lh">Коктейльная карта с фирменными миксами и редким крепким алкоголем на любой вкус.</p></div>
           </div>
         </div>
-      </div>
-      <div class="sc__cta"><button id="open-menu" class="btn"><span>Меню</span><span class="ico"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="menu-hbar">
+          <div class="dots menu-hdots" id="menu-dots"><i class="on"></i><i></i><i></i></div>
+          <div class="sc__cta"><button id="open-menu" class="btn"><span>Меню</span><span class="ico"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M11.8376 7.03553L12.4395 7.52714C12.4929 7.58331 12.5223 7.65555 12.5223 7.73035L12.5223 8.2676C12.5223 8.34237 12.4929 8.41457 12.4396 8.47073L11.8384 8.96678L1.28363 8.66546C1.12134 8.66083 0.992188 8.52794 0.992188 8.36559V7.65837C0.992188 7.49626 1.12097 7.36347 1.28301 7.35851L11.8376 7.03553Z" fill="currentColor"/>
 <path d="M8.33507 12.5742H9.59021C9.67127 12.5742 9.74954 12.5468 9.81029 12.4971L14.9175 8.47073C14.9708 8.41457 15.0002 8.34237 15.0002 8.2676V7.73035C15.0002 7.65555 14.9707 7.58331 14.9174 7.52714L9.8097 3.537C9.74896 3.48736 9.67071 3.45996 9.58968 3.45996L8.33484 3.45996C8.04883 3.45996 7.89632 3.77209 8.0852 3.9709L11.8376 7.03553L12.4395 7.52714C12.4929 7.58331 12.5223 7.65555 12.5223 7.73035L12.5223 8.2676C12.5223 8.34237 12.4929 8.41457 12.4396 8.47073L11.8384 8.96678L8.08535 12.0633C7.89658 12.2621 8.04911 12.5742 8.33507 12.5742Z" fill="currentColor"/>
 </svg></span></button></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -790,7 +805,7 @@ a{color:inherit;text-decoration:none}
 </svg></button></div><div class="my-row"><div class="my-col"><div class="picker-wrap"><div class="picker-bar"></div><div class="picker-window"><div class="picker-list"><div class="picker-item">Январь</div><div class="picker-item">Февраль</div><div class="picker-item">Март</div><div class="picker-item">Апрель</div><div class="picker-item">Май</div><div class="picker-item">Июнь</div><div class="picker-item">Июль</div><div class="picker-item sel">Август</div><div class="picker-item">Сентябрь</div><div class="picker-item">Октябрь</div><div class="picker-item">Ноябрь</div><div class="picker-item">Декабрь</div></div></div><div class="picker-fade top"></div><div class="picker-fade bot"></div></div></div><div class="my-col"><div class="picker-wrap"><div class="picker-bar"></div><div class="picker-window"><div class="picker-list"><div class="picker-item sel">2026</div><div class="picker-item">2027</div><div class="picker-item">2028</div><div class="picker-item">2029</div></div></div><div class="picker-fade top"></div><div class="picker-fade bot"></div></div></div></div><div class="modal__foot"><button class="modal__confirm" data-confirm>Потвердить</button></div></div></div><div id="interior-gallery" aria-hidden="true"><div class="ig-track" id="ig-track"></div><div class="ig-top"><div class="ig-head"><button class="ig-back" id="ig-back" aria-label="Назад"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M8.45631 2.58474L2.69349 7.47991C2.6333 7.5417 2.6001 7.62116 2.6001 7.70344V8.29442C2.6001 8.37666 2.63327 8.45609 2.69341 8.51786L8.45388 13.4152C8.5224 13.4698 8.61068 13.5 8.70212 13.5H10.1178C10.4404 13.5 10.6124 13.1568 10.3995 12.9381L5.87433 8.51786C5.8142 8.45609 5.78103 8.37666 5.78103 8.29442L5.78103 7.70344C5.78103 7.62116 5.81423 7.5417 5.87442 7.47991L10.4014 3.06203C10.6145 2.84335 10.4424 2.5 10.1198 2.5L8.70448 2.5C8.61308 2.5 8.52483 2.53013 8.45631 2.58474Z" fill="currentColor"/>
 </svg></button><span class="ig-title">Интерьер</span><span class="ig-spacer"></span></div><div class="ig-tabs" id="ig-tabs"></div><div class="ig-topfade"></div></div><div class="ig-bottom"><div class="ig-botfade"></div><div class="ig-content"><p class="ig-desc" id="ig-desc"></p><div class="ig-dots" id="ig-dots"></div></div><div class="ig-btnwrap"><div class="ig-book" id="ig-book">Забронировать</div></div></div></div>
-<div id="preloader"><video id="pl-video" muted playsinline autoplay preload="auto" src="door.d0c3a7ff.mp4"></video><div id="pl-logo"><div class="pl-rings"><svg viewBox="0 0 40 40" fill="none"><path d="M19.998 36.8308C12.3139 36.8308 6.0625 29.2804 6.0625 20C6.0625 10.7196 12.3139 3.16919 19.998 3.16919C27.6821 3.16919 33.9335 10.7196 33.9335 20C33.9335 29.2804 27.6821 36.8308 19.998 36.8308ZM19.998 4.20264C12.8837 4.20264 7.09476 11.289 7.09476 20C7.09476 28.7109 12.8837 35.7973 19.998 35.7973C27.1123 35.7973 32.9012 28.7109 32.9012 20C32.9012 11.289 27.1123 4.20264 19.998 4.20264Z" fill="currentColor"/><path d="M20 39C11.1773 39 4 30.4761 4 20C4 9.5239 11.1773 1 20 1C28.8227 1 36 9.52287 36 20C36 30.4771 28.8227 39 20 39ZM20 2.03345C11.7471 2.03345 5.03226 10.0933 5.03226 20C5.03226 29.9067 11.7471 37.9665 20 37.9665C28.2529 37.9665 34.9677 29.9067 34.9677 20C34.9677 10.0933 28.2529 2.03345 20 2.03345Z" fill="currentColor"/></svg></div><div class="pl-f"><svg viewBox="0 0 40 40" fill="none"><path d="M25.7694 13.7021H26.1018L25.5475 10.2897H13.8995V10.6503C14.1111 10.6679 14.2907 10.7051 14.4424 10.763C14.4858 10.7785 14.5261 10.7971 14.5653 10.8167C15.0525 11.0648 15.2011 11.5753 15.2011 12.37V27.6279C15.2011 28.7378 14.9245 29.2928 13.8984 29.3755V29.7082H21.5279V29.3755C20.5028 29.2917 20.2251 28.7378 20.2251 27.6279V20.2625H20.381C22.3206 20.2625 22.653 20.9001 22.8471 22.0658H23.1795V20.3265C24.3211 20.5157 24.572 21.1151 24.7299 22.0658H25.0623V17.932H24.7299C24.572 18.8828 24.3211 19.4833 23.1795 19.6713V17.932H22.8471C22.653 19.0967 22.3206 19.7354 20.381 19.7354H20.2251V10.8157H20.2881C22.5322 10.8157 23.3911 12.5633 23.835 13.7011H24.1673L23.7534 11.1516C24.8982 11.7138 25.4432 12.8702 25.7673 13.7011L25.7694 13.7021ZM17.0592 10.8178H17.0685C18.0935 10.9015 18.3712 11.4554 18.3712 12.5374V19.7375H17.0592V10.8178ZM17.0633 27.8604C17.0602 27.786 17.0592 27.7095 17.0592 27.6289V20.2635H18.3712V27.4636C18.3712 28.5415 18.0956 29.0964 17.0778 29.1822H17.0675L17.0633 27.8604Z" fill="currentColor"/></svg></div></div></div>
+<div id="preloader"><div id="pl-media"></div><div id="pl-logo"><svg id="pl-svg" viewBox="0 0 40 40" fill="none"><defs><linearGradient id="pl-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E1E1E1" stop-opacity=".12"/><stop offset=".55" stop-color="#E1E1E1" stop-opacity=".55"/><stop offset="1" stop-color="#E1E1E1" stop-opacity="1"/></linearGradient></defs><ellipse id="pl-oval-out" cx="20" cy="20" rx="15.5" ry="18.5" pathLength="1"/><ellipse id="pl-oval-in" cx="20" cy="20" rx="13.4" ry="16.3" pathLength="1"/><path id="pl-f" d="M25.7694 13.7021H26.1018L25.5475 10.2897H13.8995V10.6503C14.1111 10.6679 14.2907 10.7051 14.4424 10.763C14.4858 10.7785 14.5261 10.7971 14.5653 10.8167C15.0525 11.0648 15.2011 11.5753 15.2011 12.37V27.6279C15.2011 28.7378 14.9245 29.2928 13.8984 29.3755V29.7082H21.5279V29.3755C20.5028 29.2917 20.2251 28.7378 20.2251 27.6279V20.2625H20.381C22.3206 20.2625 22.653 20.9001 22.8471 22.0658H23.1795V20.3265C24.3211 20.5157 24.572 21.1151 24.7299 22.0658H25.0623V17.932H24.7299C24.572 18.8828 24.3211 19.4833 23.1795 19.6713V17.932H22.8471C22.653 19.0967 22.3206 19.7354 20.381 19.7354H20.2251V10.8157H20.2881C22.5322 10.8157 23.3911 12.5633 23.835 13.7011H24.1673L23.7534 11.1516C24.8982 11.7138 25.4432 12.8702 25.7673 13.7011L25.7694 13.7021ZM17.0592 10.8178H17.0685C18.0935 10.9015 18.3712 11.4554 18.3712 12.5374V19.7375H17.0592V10.8178ZM17.0633 27.8604C17.0602 27.786 17.0592 27.7095 17.0592 27.6289V20.2635H18.3712V27.4636C18.3712 28.5415 18.0956 29.0964 17.0778 29.1822H17.0675L17.0633 27.8604Z" fill="currentColor"/></svg></div></div>
 </div><!-- /#device -->
 </div><!-- /#shell -->
 
@@ -836,10 +851,12 @@ a{color:inherit;text-decoration:none}
       var dh=H/s;                                   /* дизайн-высота, дающая после масштаба реальную H */
       device.style.height=dh+'px';
       document.documentElement.style.setProperty('--screenh', dh+'px');
+      document.documentElement.style.setProperty('--vh-region', dh+'px');
     } else {
       device.style.transformOrigin='';
       device.style.height='';
       device.style.transform='scale('+Math.min(vw/402, vh/874, 1)+')';
+      document.documentElement.style.setProperty('--vh-region', '732px');
     }
   }
   /* параллакс считаем относительно видимой области viewport */
@@ -860,13 +877,13 @@ a{color:inherit;text-decoration:none}
     lastY=y; lastT=now;
     clearTimeout(idleTimer);
     idleTimer=setTimeout(function(){ fastScroll=false; updateHeader(); }, 150);      /* скролл остановился → медленный режим */
-    if(!ticking){ticking=true;requestAnimationFrame(function(){parallax();updateHeader();ticking=false;});}
+    if(!ticking){ticking=true;requestAnimationFrame(function(){parallax();updateHeader();menuH();ticking=false;});}
   }
-  fit(); parallax(); updateHeader();
-  window.addEventListener('resize',function(){fit();parallax();updateHeader();});
-  if(window.visualViewport) window.visualViewport.addEventListener('resize',function(){fit();parallax();updateHeader();});
+  fit(); parallax(); updateHeader(); menuH();
+  window.addEventListener('resize',function(){fit();parallax();updateHeader();menuH();});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',function(){fit();parallax();updateHeader();menuH();});
   viewport.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('load',function(){fit();parallax();updateHeader();});
+  window.addEventListener('load',function(){fit();parallax();updateHeader();menuH();});
 
   /* --- бургер-меню --- */
   var burger=document.getElementById('burger'),
@@ -1332,91 +1349,21 @@ a{color:inherit;text-decoration:none}
   var openInt=document.getElementById('open-interior');
   if(openInt) openInt.addEventListener('click',function(e){ e.preventDefault(); openInteriorGallery(0); });
 
-  /* --- карточка меню: пейджер со свайпом/тапом + авто ~3с, анимированная смена --- */
-  (function(){
-    var slide=document.getElementById('menu-slide'); if(!slide) return;
-    var media=document.getElementById('menu-media'),
-        titleEl=document.getElementById('menu-title'), descEl=document.getElementById('menu-desc');
-    var dark=slide.closest('.sc__dark'), dots=dark?[].slice.call(dark.querySelectorAll('.sc__dots i')):[];
-    var MENU=[
-      {img:'--img-hookah', title:'Hookah', desc:'Премиальные кальяны с авторскими ароматами и сбалансированными вкусами для расслабления.'},
-      {img:'--img-kitchen',title:'Kitchen',desc:'Авторская кухня из сезонных продуктов — выразительные вкусы и подача до мелочей.'},
-      {img:'--img-bar',    title:'Bar',    desc:'Коктейльная карта с фирменными миксами и редким крепким алкоголем на любой вкус.'}
-    ];
-    var cur=0, animating=false, timer=null, curImg=media.querySelector('.sc__media-img');
-    if(curImg) curImg.style.zIndex='2';
-    function setDots(i){ dots.forEach(function(d,di){ d.classList.toggle('on', di===i); }); }
-    function makeLine(txt){
-      var o=document.createElement('span'); o.className='line';
-      var inr=document.createElement('span'); inr.className='li'; inr.textContent=txt;
-      o.appendChild(inr); return o;
-    }
-    function buildLines(node,str){                        /* режем описание на реальные строки по переносам */
-      node.innerHTML='';
-      var words=str.split(' '), spans=[];
-      words.forEach(function(w,i){ var s=document.createElement('span'); s.textContent=w; node.appendChild(s); spans.push(s);
-        if(i<words.length-1) node.appendChild(document.createTextNode(' ')); });
-      var lines=[], curTop=null, cw=[];
-      spans.forEach(function(s){ var top=s.offsetTop;
-        if(curTop===null||top===curTop){ cw.push(s.textContent); curTop=top; }
-        else { lines.push(cw.join(' ')); cw=[s.textContent]; curTop=top; } });
-      if(cw.length) lines.push(cw.join(' '));
-      lines=lines.slice(0,3);                              /* не больше трёх строк */
-      node.innerHTML='';
-      lines.forEach(function(t){ node.appendChild(makeLine(t)); });
-    }
-    function revealText(t){                                /* заголовок-строка → потом строки описания быстрым каскадом */
-      titleEl.innerHTML=''; titleEl.appendChild(makeLine(t.title));
-      buildLines(descEl, t.desc);
-      var lines=[titleEl.querySelector('.line')].concat([].slice.call(descEl.querySelectorAll('.line')));
-      lines.forEach(function(o,idx){ o.querySelector('.li').style.transitionDelay=(idx*0.07)+'s'; });
-      requestAnimationFrame(function(){ requestAnimationFrame(function(){
-        lines.forEach(function(o){ o.classList.add('on'); });
-      });});
-    }
-    function swapImage(v){                                 /* новая графика въезжает справа, текущая уходит влево */
-      var next=document.createElement('div');
-      next.className='sc__media-img';
-      next.style.backgroundImage='var('+v+')';
-      next.style.zIndex='2';
-      next.style.transform='translateX(100%)';
-      media.appendChild(next);
-      var old=curImg; curImg=next;
-      if(old) old.style.zIndex='1';
-      requestAnimationFrame(function(){ requestAnimationFrame(function(){
-        next.style.transition='transform .7s cubic-bezier(.22,.61,.36,1)';
-        next.style.transform='translateX(0)';
-        if(old){ old.style.transition='transform .7s cubic-bezier(.22,.61,.36,1)'; old.style.transform='translateX(-14%)'; }
-      });});
-      if(old) setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 760);
-    }
-    function go(i){
-      if(animating) return; animating=true;
-      cur=((i%MENU.length)+MENU.length)%MENU.length;
-      swapImage(MENU[cur].img);
-      revealText(MENU[cur]);
-      setDots(cur);
-      setTimeout(function(){ animating=false; }, 780);
-    }
-    function next(){ go(cur+1); }
-    function start(){ if(!timer) timer=setInterval(next,3000); }
-    function stop(){ if(timer){ clearInterval(timer); timer=null; } }
-    function bump(){ stop(); next(); start(); }            /* ручное действие: сразу сменить и перезапустить авто */
-    var sx=null, sy=null, moved=false;
-    slide.addEventListener('pointerdown',function(e){ sx=e.clientX; sy=e.clientY; moved=false; });
-    slide.addEventListener('pointermove',function(e){ if(sx!=null && (Math.abs(e.clientX-sx)>6||Math.abs(e.clientY-sy)>6)) moved=true; });
-    slide.addEventListener('pointerup',function(e){
-      if(sx==null) return; var dx=e.clientX-sx, dy=e.clientY-sy; sx=null;
-      if(Math.abs(dy)>Math.abs(dx) && Math.abs(dy)>12) return;  /* вертикальный скролл страницы — не листаем */
-      bump();
-    });
-    slide.addEventListener('click',function(){ if(!moved) bump(); });  /* явный тап/клик (свайп уже обработан pointerup) */
-    if('IntersectionObserver' in window){
-      var io=new IntersectionObserver(function(es){ es.forEach(function(e){ e.isIntersecting?start():stop(); }); },
-        {root:document.getElementById('viewport'), threshold:.35});
-      io.observe(dark);
-    } else start();
-  })();
+  /* --- блок меню: pinned horizontal scroll (вертикаль → горизонталь) --- */
+  var menuWrap=document.querySelector('.menu-hwrap'), menuTrack=document.getElementById('menu-track'),
+      menuDots=[].slice.call(document.querySelectorAll('#menu-dots i'));
+  function menuH(){
+    if(!menuWrap||!menuTrack) return;
+    var N=menuTrack.children.length;
+    var vpr=viewport.getBoundingClientRect(), wr=menuWrap.getBoundingClientRect();
+    var denom=wr.height - vpr.height;
+    var prog=denom>0 ? (vpr.top - wr.top)/denom : 0;
+    if(prog<0)prog=0; if(prog>1)prog=1;
+    var travel=402*(N-1);                                  /* локальные px (немасштабированные) */
+    menuTrack.style.transform='translate3d('+(-prog*travel)+'px,0,0)';
+    var idx=Math.round(prog*(N-1));
+    menuDots.forEach(function(d,i){ d.classList.toggle('on', i===idx); });
+  }
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ if(igEl&&igEl.classList.contains('open')){ closeInteriorGallery(); return; } var o=document.querySelector('.modal.open'); if(o) closeModal(o); } });
 
   /* --- hero: разбиваем описание на строки-маски (проявятся снизу-вверх на этапе rv-chrome) --- */
@@ -1439,59 +1386,51 @@ a{color:inherit;text-decoration:none}
       inr.style.transitionDelay=(idx*0.1)+'s';      /* по очереди, плотным потоком (без пауз) */
       o.appendChild(inr); p.appendChild(o);
     });
+    /* если прелоудер есть — описание раскроет он в финале; иначе показываем сами после отрисовки */
+    if(!document.getElementById('preloader')){
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ p.classList.add('reveal'); }); });
+    }
   })();
 
-  /* ===== оркестрация прелоудера ===== */
+  /* ===== оркестрация прелоудера (ВЫКЛ: сразу показываем лендинг без анимации логотипа) ===== */
   (function(){
     var dev=document.getElementById('device'), pl=document.getElementById('preloader');
     if(!dev||!pl) return;
-    var vid=document.getElementById('pl-video'), plLogo=document.getElementById('pl-logo'),
-        blackout=document.getElementById('hero-blackout');
-    var PRELOADER_OFF=true;                              /* временно выключен: сразу показываем лендинг */
+    var logo=document.getElementById('pl-logo');
+    var PRELOADER_OFF=true;                               /* прелоудер отключён */
     if(PRELOADER_OFF){
-      try{ if(vid){ vid.pause(); vid.removeAttribute('autoplay'); } }catch(e){}
       dev.classList.remove('pl');
       dev.classList.add('rv-mark','rv-brand','rv-chrome');
-      if(blackout) blackout.style.opacity='0';
+      var d=document.querySelector('.hero__desc'); if(d) d.classList.add('reveal');
       pl.style.display='none';
       return;
     }
-    var started=false, finished=false;
-    function flyLogo(){
-      var scale=dev.getBoundingClientRect().width/402;
-      var brand=document.querySelector('#site-header .brand'); if(!brand||!plLogo) return;
-      var br=brand.getBoundingClientRect(), lr=plLogo.getBoundingClientRect();
+    function flyLogo(){                                   /* финальная позиция и масштаб считаются по реальному логотипу в хедере */
+      var brand=document.querySelector('#site-header .brand'); if(!brand||!logo) return;
+      var scale=dev.getBoundingClientRect().width/402 || 1;
+      var br=brand.getBoundingClientRect(), lr=logo.getBoundingClientRect();
       var dx=((br.left+br.width/2)-(lr.left+lr.width/2))/scale;
       var dy=((br.top+br.height/2)-(lr.top+lr.height/2))/scale;
-      plLogo.style.transform='translate('+dx+'px,'+dy+'px) scale(.4)';
+      var s=br.width/lr.width || .5;                     /* точный масштаб под размер бренда — без скачка */
+      logo.style.transform='translate('+dx+'px,'+dy+'px) scale('+s+')';
     }
-    function finish(){ if(finished) return; finished=true;
-      if(blackout) blackout.style.opacity='0';
+    function finish(){
+      /* лендинг доводим до финального состояния ПОД непрозрачным прелоудером (не видно),
+         затем плавно гасим прелоудер — получается бесшовный кроссфейд без «стыковки» */
       dev.classList.remove('pl');
-      setTimeout(function(){ pl.style.display='none'; }, 800);
+      dev.classList.add('rv-mark','rv-brand','rv-chrome');
+      var d=document.querySelector('.hero__desc'); if(d) d.classList.add('reveal');
+      pl.classList.add('gone');
+      setTimeout(function(){ pl.style.display='none'; }, 900);
     }
-    function runReveal(){
-      pl.classList.add('fadevid','clearbg'); pl.style.background='transparent'; pl.style.pointerEvents='none';
-      if(blackout) blackout.style.opacity='1';
-      flyLogo();
-      setTimeout(function(){ dev.classList.add('rv-brand'); if(plLogo) plLogo.style.opacity='0'; }, 850);
-      setTimeout(function(){ dev.classList.add('rv-mark'); }, 1150);
-      setTimeout(function(){ dev.classList.add('rv-chrome'); }, 2050);
-      setTimeout(finish, 2900);
-    }
-    function startLogo(){ if(started) return; started=true;
-      pl.classList.add('logo-in');
-      setTimeout(function(){ pl.classList.add('logo-f'); }, 1000);
-      setTimeout(runReveal, 1650);
-    }
-    if(vid){
-      if(vid.play){ var p=vid.play(); if(p&&p.catch) p.catch(function(){}); }
-      vid.addEventListener('timeupdate',function(){ if(vid.currentTime>=3.5) startLogo(); });
-      vid.addEventListener('ended', startLogo);
-      setTimeout(function(){ if(!started && (vid.paused || vid.readyState<2)) startLogo(); }, 4200);
-    } else { startLogo(); }
-    setTimeout(startLogo, 6000);
-    setTimeout(finish, 12000);
+    /* таймлайн: 0–3 заглушка · 3–4.4 овалы · 4.4–5.4 F · 5.4 воздушный float ·
+       5.9 лёгкое движение к хедеру · 6.5 плавный полёт · 7.1 кроссфейд */
+    setTimeout(function(){ pl.classList.add('logo-on','draw'); }, 3000);
+    setTimeout(function(){ pl.classList.add('f-in'); }, 4400);
+    setTimeout(function(){ pl.classList.add('float'); }, 5200);          /* лёгкое парение */
+    setTimeout(function(){ logo.style.transform='translateY(-10px)'; }, 5700);  /* мягкое движение к хедеру */
+    setTimeout(function(){ pl.classList.remove('float'); flyLogo(); pl.classList.add('media-out'); }, 6300);
+    setTimeout(finish, 6900);
   })();
 })();
 </script>
